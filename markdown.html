@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Live Viewer | PixelFlow</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-red: #ff0055;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 1000px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* تقسيم شاشة المحرر التفاعلي المزدوجة */
+        .editor-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .editor-split { grid-template-columns: 1fr; }
+        }
+
+        .pane {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pane-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--accent-red);
+            border-left: 3px solid var(--accent-red);
+            padding-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 350px;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: #fff;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--accent-red); }
+
+        /* منطقة العرض والمعاينة المنسقة للـ HTML الناتجة */
+        .preview-area {
+            width: 100%;
+            height: 350px;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: #e2e2e9;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 1rem;
+        }
+
+        /* تنسيقات النص المترجم داخل المعاينة */
+        .preview-area h1 { font-size: 1.6rem; margin-bottom: 10px; color: #fff; border-bottom: 1px solid var(--card-border); padding-bottom: 5px; }
+        .preview-area h2 { font-size: 1.3rem; margin-top: 15px; margin-bottom: 8px; color: #fff; }
+        .preview-area p { margin-bottom: 12px; }
+        .preview-area code { background: var(--card-border); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--accent-cyan); }
+        .preview-area ul, .preview-area ol { margin-left: 20px; margin-bottom: 12px; }
+
+        /* سيو وشرح الصفحة لأدسنس */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-red); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>Markdown Live</h1>
+            <p>Write raw Markdown syntax on the left and view production-ready, compiled HTML formats instantly.</p>
+        </header>
+
+        <div class="editor-split">
+            
+            <div class="pane">
+                <div class="pane-title">Markdown Input</div>
+                <textarea id="markdown-editor" placeholder="Type Markdown here...&#10;# Heading 1&#10;**Bold Text**&#10;- List Item"></textarea>
+            </div>
+
+            <div class="pane">
+                <div class="pane-title" style="color: var(--accent-cyan); border-color: var(--accent-cyan);">Live HTML Output</div>
+                <div class="preview-area" id="markdown-preview"></div>
+            </div>
+
+        </div>
+
+        <section class="tool-info">
+            <h2>Streamlining Content Layouts with Markdown</h2>
+            <p>Markdown formatting allows creators and web architecture specialists to draft structurally sound text strings without writing repetitive HTML tags manually. PixelFlow incorporates a localized compiler stack that interprets character flags and builds strict HTML components instantly.</p>
+            <p>By hosting the parser logic completely inside the local window environment, we remove network transmission delays and tracking vulnerabilities. Your source text strings remain isolated in your machine memory grid, offering speed and privacy by design.</p>
+        </section>
+    </div>
+
+    <script>
+        const markdownEditor = document.getElementById('markdown-editor');
+        const markdownPreview = document.getElementById('markdown-preview');
+
+        // نص افترافي يظهر بمجرد فتح الأداة لشرح طريقة عملها للزائر
+        const initialTemplate = `# Welcome to PixelFlow Markdown
+
+This is a **live preview** editor.
+
+## Features:
+- Real-time compilation
+- 100% Client-side tracking protection
+- Styled code support like \`console.log("Hello");\`
+
+Try editing this block to see the HTML blueprint update instantly below.`;
+
+        // دالة تحويل الماركدوان لـ HTML وعرضه
+        function renderMarkdown() {
+            const rawMarkdown = markdownEditor.value;
+            // استخدام مكتبة marked لترجمة النص
+            markdownPreview.innerHTML = marked.parse(rawMarkdown);
+        }
+
+        // الاستماع للكتابة وتحديث الشاشة فوراً
+        markdownEditor.addEventListener('input', renderMarkdown);
+
+        // تحميل النص الافترافي عند فتح الصفحة لأول مرة
+        window.addEventListener('DOMContentLoaded', () => {
+            markdownEditor.value = initialTemplate;
+            renderMarkdown();
+        });
+    </script>
+</body>
+</html>

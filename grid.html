@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Grid Builder | PixelFlow</title>
+    <style>
+        :root { 
+            --accent-lime: #00ff66; 
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 900px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-lime); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .workspace { grid-template-columns: 300px 1fr; }
+        }
+
+        /* لوحة التحكم الجانبية */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: var(--accent-lime);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, select:focus { border-color: var(--accent-lime); }
+
+        /* منطقة المعاينة الحية */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .grid-preview {
+            background: #040408;
+            border: 2px dashed #22223b;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 250px;
+            display: grid;
+        }
+
+        .grid-item {
+            background: rgba(0, 255, 102, 0.1);
+            border: 1px solid var(--accent-lime);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--accent-lime);
+            font-size: 1.1rem;
+            min-height: 50px;
+        }
+
+        /* صندوق الكود الناتج */
+        .code-box {
+            background: #040408;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+        }
+
+        pre {
+            color: #f8f8f2;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-lime);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .copy-btn:hover { opacity: 0.9; }
+
+        /* سيو وشرح الصفحة */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-lime); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>CSS Grid Builder</h1>
+            <p>Architect complex responsive CSS Grid layouts visually and harvest clean production-ready code.</p>
+        </header>
+
+        <div class="workspace">
+            <!-- أدوات التحكم -->
+            <div class="controls">
+                <div class="control-group">
+                    <label for="grid-columns">Columns:</label>
+                    <input type="number" id="grid-columns" min="1" max="12" value="3">
+                </div>
+                <div class="control-group">
+                    <label for="grid-rows">Rows:</label>
+                    <input type="number" id="grid-rows" min="1" max="12" value="2">
+                </div>
+                <div class="control-group">
+                    <label for="grid-gap">Gap (px):</label>
+                    <input type="number" id="grid-gap" min="0" max="50" value="15">
+                </div>
+            </div>
+
+            <!-- المعاينة والكود -->
+            <div class="preview-container">
+                <div class="grid-preview" id="live-grid"></div>
+
+                <div class="code-box">
+                    <button class="copy-btn" id="copy-code">Copy Code</button>
+                    <pre><code id="code-output"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <section class="tool-info">
+            <h2>The Mechanics of Two-Dimensional CSS Grids</h2>
+            <p>CSS Grid Layout introduces a highly rigid two-dimensional grid system to web design, controlling both columns and rows seamlessly. Unlike structural flexboxes which are primarily one-dimensional, grids eliminate the need for complicated margins and float parameters.</p>
+            <p>Our real-time CSS Grid Builder lets you calibrate track sizes and gutter parameters visually. The engine generates dynamic code blocks instantly inside your browser thread, helping you build solid responsive layouts with minimal code overhead.</p>
+        </section>
+    </div>
+
+    <script>
+        const colsInput = document.getElementById('grid-columns');
+        const rowsInput = document.getElementById('grid-rows');
+        const gapInput = document.getElementById('grid-gap');
+        const liveGrid = document.getElementById('live-grid');
+        const codeOutput = document.getElementById('code-output');
+        const copyBtn = document.getElementById('copy-code');
+
+        function updateGrid() {
+            const cols = parseInt(colsInput.value) || 1;
+            const rows = parseInt(rowsInput.value) || 1;
+            const gap = parseInt(gapInput.value) || 0;
+
+            // تحديث ستايل حاوية المعاينة
+            liveGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            liveGrid.style.gridTemplateRows = `repeat(${rows}, minmax(50px, auto))`;
+            liveGrid.style.gridGap = `${gap}px`;
+
+            // إعادة توليد العناصر الداخلية للمعاينة
+            liveGrid.innerHTML = '';
+            const totalItems = cols * rows;
+            for (let i = 1; i <= totalItems; i++) {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.textContent = i;
+                liveGrid.appendChild(item);
+            }
+
+            // توليد كود الـ CSS وتحديثه في الصندوق
+            const generatedCode = `.grid-container {\n  display: grid;\n  grid-template-columns: repeat(${cols}, 1fr);\n  grid-template-rows: repeat(${rows}, 1fr);\n  grid-gap: ${gap}px;\n}`;
+            codeOutput.textContent = generatedCode;
+        }
+
+        // الاستماع للتغييرات لحظياً
+        colsInput.addEventListener('input', updateGrid);
+        rowsInput.addEventListener('input', updateGrid);
+        gapInput.addEventListener('input', updateGrid);
+
+        // نسخ الكود
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(codeOutput.textContent);
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = originalText, 1500);
+        });
+
+        // تشغيل أولي عند تحميل الصفحة
+        updateGrid();
+    </script>
+</body>
+</html>

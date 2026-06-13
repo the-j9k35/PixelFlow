@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Format Converter | PixelFlow</title>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-pink: #ff007f;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 800px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* صندوق الرفع */
+        .upload-box {
+            background: var(--card-bg);
+            border: 2px dashed var(--card-border);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            margin-bottom: 30px;
+        }
+        .upload-box:hover, .upload-box.dragover { border-color: var(--accent-pink); }
+        .upload-box p { color: var(--text-muted); font-size: 1.1rem; }
+        .upload-box span { color: var(--accent-pink); font-weight: 600; }
+        #file-input { display: none; }
+
+        /* مساحة العمل */
+        .workspace {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .options-panel {
+            margin-bottom: 25px;
+            background: #111122;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .options-panel label { font-weight: 600; color: #fff; }
+        
+        /* قائمة الصيغ الاختيارية */
+        .select-format {
+            background: var(--bg-dark);
+            color: #fff;
+            border: 2px solid var(--card-border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .select-format:focus { border-color: var(--accent-pink); }
+
+        .file-details {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            background: #090915;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-pink);
+        }
+
+        /* زر التحويل والإطلاق */
+        .convert-btn {
+            display: block;
+            width: 100%;
+            background: var(--accent-pink);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+        .convert-btn:hover { opacity: 0.9; box-shadow: 0 0 25px rgba(255, 0, 127, 0.4); }
+
+        .download-box {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        /* قسم السيو والشرح للبشر ومحركات البحث */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-pink); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>Format Converter</h1>
+            <p>Convert your images to modern web extensions instantly. Free, secure, and processing locally.</p>
+        </header>
+
+        <div class="upload-box" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p>Drag & drop your image here or <span>Browse files</span></p>
+            <p style="font-size: 0.85rem; margin-top: 10px; color: #555;">Accepts: PNG, JPEG, JPG, WEBP, BMP</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div class="workspace" id="workspace">
+            <div class="file-details">
+                Selected File: <span id="file-name" style="color: #fff; font-weight: 600;">image.png</span>
+            </div>
+
+            <div class="options-panel">
+                <label for="target-format">Convert to Target Format:</label>
+                <select id="target-format" class="select-format">
+                    <option value="image/webp">WEBP (Recommended for Web)</option>
+                    <option value="image/jpeg">JPEG (Standard)</option>
+                    <option value="image/png">PNG (Lossless)</option>
+                </select>
+            </div>
+
+            <button class="convert-btn" id="convert-trigger">Process Conversion</button>
+
+            <div class="download-box" id="download-box">
+                <a id="download-link" class="download-btn" download="converted-image">Download Converted Image</a>
+            </div>
+        </div>
+
+        <section class="tool-info">
+            <h2>Why Convert Formats Locally?</h2>
+            <p>Traditional image converters upload your files directly to external servers, creating heavy bandwidth usage and exposing your confidential visuals to data logs. PixelFlow redefines this dynamic by shifting the rendering pipeline entirely inside your personal machine architecture.</p>
+            <p>Whether you need to generate high-efficiency WebP variants to hit optimal Core Web Vitals rankings, or shift transparency-backed PNG files into streamlined JPEGs, our client-side conversion engine processes layouts instantly without zero third-party visibility.</p>
+        </section>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const workspace = document.getElementById('workspace');
+        const fileNameEl = document.getElementById('file-name');
+        const targetFormatSelect = document.getElementById('target-format');
+        const convertTrigger = document.getElementById('convert-trigger');
+        const downloadBox = document.getElementById('download-box');
+        const downloadLink = document.getElementById('download-link');
+
+        let uploadedImgSource = null;
+        let originalFileName = "image";
+
+        // أحداث السحب والإفلات
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if(files.length > 0) handleFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                alert('Please upload an image file.');
+                return;
+            }
+            
+            // فصل الاسم عن الامتداد لحفظ اسم الملف الاصلي عند التحميل
+            originalFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+            fileNameEl.innerText = file.name;
+            downloadBox.style.display = 'none'; // إخفاء زر التحميل القديم لو رفع صورة جديدة
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImgSource = e.target.result;
+                workspace.style.display = 'block';
+                workspace.scrollIntoView({ behavior: 'smooth' });
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // معالجة التحويل برمجياً عند الضغط على الزر
+        convertTrigger.addEventListener('click', () => {
+            if(!uploadedImgSource) return;
+
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // ملء الخلفية باللون الأبيض في حال تحويل صورة شفافة (PNG) إلى JPEG
+                if(targetFormatSelect.value === 'image/jpeg') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.drawImage(img, 0, 0);
+
+                const targetFormat = targetFormatSelect.value;
+                const convertedDataUrl = canvas.toDataURL(targetFormat, 0.92); // جودة عالية 92%
+                
+                // تحديد الامتداد الجديد للملف المحمل
+                let extension = 'webp';
+                if(targetFormat === 'image/jpeg') extension = 'jpg';
+                if(targetFormat === 'image/png') extension = 'png';
+
+                downloadLink.href = convertedDataUrl;
+                downloadLink.download = `${originalFileName}_converted.${extension}`;
+                
+                // إظهار صندوق التحميل والتمرير له
+                downloadBox.style.display = 'block';
+                downloadBox.scrollIntoView({ behavior: 'smooth' });
+            }
+            img.src = uploadedImgSource;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Minifier | PixelFlow</title>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-blue: #3a86ff;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 800px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* منطقة مساحة العمل */
+        .workspace {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+            border-left: 3px solid var(--accent-blue);
+            padding-left: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: #fff;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--accent-blue); }
+
+        .minify-btn {
+            display: block;
+            width: 100%;
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(58, 134, 255, 0.2);
+            transition: all 0.2s;
+            margin-bottom: 25px;
+        }
+        .minify-btn:hover { opacity: 0.9; box-shadow: 0 0 25px rgba(58, 134, 255, 0.4); }
+
+        /* جزء النتائج والوفر في الحجم */
+        .result-box {
+            display: none;
+            background: #090915;
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .saving-badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        /* سيو وشرح الصفحة لأدسنس */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-blue); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>SVG Minifier</h1>
+            <p>Strip unnecessary XML metadata, comments, and empty spaces from your SVG vectors instantly.</p>
+        </header>
+
+        <div class="workspace">
+            <div class="workspace-title">Paste Raw SVG Code</div>
+            <textarea id="svg-input" placeholder='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">... </svg>'></textarea>
+            
+            <button class="minify-btn" id="minify-trigger">Optimize & Minify SVG</button>
+
+            <div class="result-box" id="result-wrapper">
+                <div class="saving-badge" id="saving-ratio">Size reduced by 0%</div>
+                <div class="workspace-title" style="color: var(--accent-cyan); border-color: var(--accent-cyan);">Optimized Output</div>
+                <textarea id="svg-output" readonly placeholder="Optimized code will appear here..."></textarea>
+            </div>
+        </div>
+
+        <section class="tool-info">
+            <h2>The Architectural Importance of SVG Minification</h2>
+            <p>Scalable Vector Graphics (SVG) are structural XML text frameworks rather than traditional rasterized pixel maps. Vector creation programs routinely embed bloating editor metadata, editor layers, empty namespaces, and heavy decimal floats that serve no visual purpose in active browser builds.</p>
+            <p>PixelFlow integrates an advanced regex array algorithm that parses code layouts locally to filter redundant node trees. By cleaning elements inside your device RAM, page rendering speed skyrockets without risking data leaks to external server relays.</p>
+        </section>
+    </div>
+
+    <script>
+        const svgInput = document.getElementById('svg-input');
+        const svgOutput = document.getElementById('svg-output');
+        const minifyTrigger = document.getElementById('minify-trigger');
+        const resultWrapper = document.getElementById('result-wrapper');
+        const savingRatio = document.getElementById('saving-ratio');
+
+        minifyTrigger.addEventListener('click', () => {
+            const rawSvg = svgInput.value.trim();
+            if(rawSvg === '' || !rawSvg.includes('<svg')) {
+                alert('Please paste a valid SVG code snippet.');
+                return;
+            }
+
+            const originalSize = rawSvg.length;
+
+            // خوارزمية ضغط وتنظيف أكواد الـ SVG برمجياً باستخدام الـ Regular Expressions
+            let minifiedSvg = rawSvg
+                .replace(/<!--[\s\S]*?-->/g, '') // حذف جميع التعليقات البرمجية
+                .replace(/<\?xml[\s\S]*?\?>/g, '') // حذف ترويسة XML غير الضرورية في الويب
+                .replace(/id="[\s\S]*?"/g, '') // حذف المعرفات العشوائية لتقليل الحجم
+                .replace(/>\s+</g, '><') // حذف الفراغات والسطور بين الوسوم التجمعية
+                .replace(/\s+/g, ' '); // تحويل المسافات المتكررة لمسافة واحدة فقط
+
+            const minifiedSize = minifiedSvg.length;
+            
+            // حساب نسبة الوفر في الحجم الناتجة عن التنظيف
+            const savings = Math.round(((originalSize - minifiedSize) / originalSize) * 100);
+
+            svgOutput.value = minifiedSvg.trim();
+            savingRatio.innerText = `Size reduced by ${savings >= 0 ? savings : 0}% !`;
+            
+            // إظهار النتيجة وسحب الشاشة لها بسلاسة
+            resultWrapper.style.display = 'block';
+            resultWrapper.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

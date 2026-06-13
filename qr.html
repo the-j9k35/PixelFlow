@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator | PixelFlow</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-yellow: #ffcc00;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 650px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* مساحة العمل لكتابة البيانات */
+        .workspace {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent-yellow);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: #fff;
+            padding: 14px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--accent-yellow); }
+
+        .generate-btn {
+            display: block;
+            width: 100%;
+            background: var(--accent-yellow);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+            transition: all 0.2s;
+        }
+        .generate-btn:hover { opacity: 0.9; box-shadow: 0 0 25px rgba(255, 204, 0, 0.4); }
+
+        /* صندوق عرض الـ QR المتولد */
+        .qr-result-box {
+            display: none;
+            background: #090915;
+            border: 1px solid var(--card-border);
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        /* حاوية صلبة لضمان ظهور الباركود بشكل ناصع البياض وقابل للمسح */
+        #qrcode-canvas {
+            display: inline-block;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        #qrcode-canvas img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* سيو وشرح الصفحة لضمان قبول سريع ومضمون في أدسنس */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-yellow); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>QR Code Generator</h1>
+            <p>Generate high-density, vector-grade QR matrices locally from any URL or raw text script.</p>
+        </header>
+
+        <div class="workspace">
+            <div class="input-group">
+                <label for="qr-data">Enter URL or Text:</label>
+                <input type="text" id="qr-data" placeholder="https://example.com or your custom text...">
+            </div>
+            
+            <button class="generate-btn" id="qr-trigger">Generate QR Code</button>
+
+            <div class="qr-result-box" id="qr-result-wrapper">
+                <div id="qrcode-canvas"></div>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Scan this code directly with your mobile camera</p>
+            </div>
+        </div>
+
+        <section class="tool-info">
+            <h2>The Security of Generating QR Codes Locally</h2>
+            <p>Quick Response (QR) matrix symbols are 2D bar-mappings that translate alphanumeric strings into readable visual grids. Most legacy cloud scripts track user destinations by bouncing your links through data-collection servers before compiling the image asset.</p>
+            <p>PixelFlow introduces a completely sandboxed encoding engine. By compiling your string arrays into graphic matrices right inside your local machine thread, your destination targets remain invisible to tracking nets, guaranteeing pure data isolation and instant vector generation.</p>
+        </section>
+    </div>
+
+    <script>
+        const qrDataInput = document.getElementById('qr-data');
+        const qrTrigger = document.getElementById('qr-trigger');
+        const qrResultWrapper = document.getElementById('qr-result-wrapper');
+        const qrcodeCanvas = document.getElementById('qrcode-canvas');
+
+        let qrObjectInstance = null;
+
+        qrTrigger.addEventListener('click', () => {
+            const dataText = qrDataInput.value.trim();
+            if(dataText === '') {
+                alert('Please enter a valid URL or text string first.');
+                return;
+            }
+
+            // تنظيف الحاوية من الباركود القديم لو موجود
+            qrcodeCanvas.innerHTML = "";
+
+            // توليد الباركود الجديد بذكاء وأبعاد مظبوطة جداً للموبايل
+            qrObjectInstance = new QRCode(qrcodeCanvas, {
+                text: dataText,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H // أعلى مستوى تصحيح أخطاء لسهولة المسح
+            });
+
+            // إظهار الصندوق وسحب الشاشة له بسلاسة
+            qrResultWrapper.style.display = 'block';
+            qrResultWrapper.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

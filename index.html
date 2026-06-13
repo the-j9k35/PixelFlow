@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelFlow | Next-Gen Web Utilities & Developer Tools</title>
+    <style>
+        /* التأسيس الجغرافي والألوان الثابتة للموقع */
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-pink: #ff007f;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        /* إعادة ضبط المصنع وضمان مرونة الأبعاد */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            line-height: 1.6; 
+            overflow-x: hidden;
+        }
+
+        /* الحاوية الرئيسية لضمان عدم تمدد الموقع بشكل مشوه على الشاشات الكبيرة */
+        .wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* الهيدر الرئيسي (تجاوبي للموبايل والكمبيوتر) */
+        header { 
+            padding: 120px 0 60px 0; 
+            text-align: center; 
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 70px 0 40px 0; }
+        }
+
+        header h1 { 
+            font-size: 4rem; 
+            font-weight: 800;
+            color: var(--text-main); 
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.6rem; letter-spacing: -1px; }
+        }
+
+        header p { 
+            font-size: 1.25rem; 
+            color: var(--text-muted); 
+            max-width: 650px; 
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            header p { font-size: 1rem; }
+        }
+
+        /* شبكة الأدوات الذكية - التجاوب التلقائي الدقيق */
+        .tools-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 24px; 
+            margin: 40px 0 80px 0;
+        }
+
+        @media (max-width: 480px) {
+            .tools-grid { 
+                grid-template-columns: 1fr; /* حارة واحدة كاملة على الشاشات الصغيرة جداً */
+                gap: 16px;
+            }
+        }
+
+        /* تصميم الكارت - محمي ضد الانهيار */
+        .tool-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--card-border); 
+            border-radius: 16px; 
+            padding: 32px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+        }
+
+        .tool-card:hover { 
+            border-color: var(--accent-cyan); 
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 240, 255, 0.04);
+        }
+
+        .tool-card-content h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .tool-card-content p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            margin-bottom: 28px;
+        }
+
+        /* أزرار الإطلاق الحركية */
+        .btn { 
+            display: block; 
+            width: 100%;
+            background: transparent; 
+            color: var(--accent-cyan); 
+            border: 2px solid var(--card-border);
+            padding: 12px 24px; 
+            border-radius: 10px; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .tool-card:hover .btn {
+            border-color: var(--accent-cyan);
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        /* الأقسام النصية والشرح الإستراتيجي (مكتوب بأسلوب بشري 100%) */
+        .editorial-section { 
+            padding: 80px 0;
+            border-top: 1px solid var(--card-border);
+            max-width: 850px;
+        }
+
+        .editorial-section h2 { 
+            font-size: 2.2rem;
+            color: var(--accent-pink); 
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .editorial-section h2 { font-size: 1.7rem; }
+        }
+
+        .article-block {
+            margin-bottom: 44px;
+        }
+
+        .article-block h4 {
+            font-size: 1.25rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .article-block p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+
+        /* الفوتر المتوافق مع متطلبات AdSense */
+        footer {
+            padding: 60px 0;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-bottom: 24px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        footer p {
+            font-size: 0.88rem;
+            color: #4c4c5e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+        <header>
+            <h1>PixelFlow</h1>
+            <p>No paywalls. No tracking. Just ultra-fast, browser-based utilities built to keep your workflow moving forward.</p>
+        </header>
+
+        <div class="tools-grid">
+            
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Image Optimizer</h3>
+                    <p>Compress PNG, JPG, and WebP images instantly without destroying your visual clarity. Built for lightning-fast website performance.</p>
+                </div>
+                <a href="compressor.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Format Converter</h3>
+                    <p>Convert audio, video, and document formats seamlessly right inside your browser session. Clean, simple, and dependency-free.</p>
+                </div>
+                <a href="converter.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Color Toolkit</h3>
+                    <p>Extract exact hex codes from images, generate custom neon gradients, and export CSS variables ready for your stylesheet.</p>
+                </div>
+                <a href="colors.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>SVG & Code Clean</h3>
+                    <p>Paste raw vector code or scripts to instantly strip out bloated metadata, comments, and unused tags for maximum compression.</p>
+                </div>
+                <a href="minify.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Smart PDF Suite</h3>
+                    <p>Merge multiple documents, split large files apart, or extract specific pages securely without sending sensitive data to external clouds.</p>
+                </div>
+                <a href="pdf.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Markdown Live</h3>
+                    <p>Write raw Markdown text on the left and view production-ready, beautifully rendered HTML outputs on the right in real time.</p>
+                </div>
+                <a href="markdown.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>String Inspector</h3>
+                    <p>Analyze text blocks instantly to calculate word density, encrypt keys via SHA-256, or clean up broken code formatting.</p>
+                </div>
+                <a href="text.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>CSS Grid Builder</h3>
+                    <p>Visual layout architect. Drag slider bars to visualize complex grid patterns and instantly copy the clean CSS layout code.</p>
+                </div>
+                <a href="grid.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Password Forge</h3>
+                    <p>Generate highly secure, randomized cryptographic keys locally. Customize length, symbols, and lookups with local entropy.</p>
+                </div>
+                <a href="password.html" class="btn">Launch Tool</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-content">
+                    <h3>Base64 Encoder</h3>
+                    <p>Convert system files, raw images, or plain text characters into completely stable Base64 strings for direct code embeds.</p>
+                </div>
+                <a href="base64.html" class="btn">Launch Tool</a>
+            </div>
+
+        </div>
+
+        <section class="editorial-section">
+            <h2>Rethinking Online Utilities</h2>
+            
+            <div class="article-block">
+                <h4>The Problem with Modern Web Tools</h4>
+                <p>We’ve all experienced it. You search for a basic task—like shrinking an image file or converting a text document—and you end up trapped in a cycle of endless popup ads, forced registration screens, or sudden premium tier restrictions halfway through your work. Most utility websites exist simply to capture your data or force you into a subscription model.</p>
+            </div>
+
+            <div class="article-block">
+                <h4>How PixelFlow Operates Differently</h4>
+                <p>PixelFlow is structured on a strict client-side architecture. When you upload an asset to be optimized, converted, or parsed, that file never travels across the internet to a remote server farm. Everything occurs safely inside the sandbox environment of your own browser tab using modern WebAssembly and native JavaScript APIs.</p>
+                <p>This means zero data transfer latency, zero risk of data intercepts, and complete data privacy by design. If you disconnect your computer from the internet completely, our tools will continue functioning perfectly.</p>
+            </div>
+
+            <div class="article-block">
+                <h4>No Tracks Left Behind</h4>
+                <p>We do not store logs of your creations, we do not monitor your input text strings, and we do not maintain historical tracking databases. Once you close out your active browser tab, your work is permanently vanished from the system memory. Clean code, minimal interfaces, and high execution speed are the core benchmarks of this platform.</p>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-links">
+                <a href="about.html">About Us</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="contact.html">Contact Support</a>
+            </div>
+            <p>&copy; 2026 PixelFlow. Engineered for performance and total user privacy.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>

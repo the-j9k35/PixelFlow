@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Inspector | PixelFlow</title>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-purple: #bd00ff;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 800px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* صندوق الكتابة الرئيسي */
+        .text-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 220px;
+            background: #111122;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: #fff;
+            padding: 15px;
+            font-size: 1.05rem;
+            resize: none;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--accent-purple); }
+
+        /* شريط أزرار التحكم السريع */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: transparent;
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .action-btn:hover { background: var(--accent-purple); color: #fff; }
+
+        /* شبكة العدادات الإحصائية للتحليل اللحظي */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* سيو وشرح الصفحة لأدسنس ومحركات البحث */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-purple); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>String Inspector</h1>
+            <p>Analyze word frequency, compute character density, and manipulate layout casings in real time.</p>
+        </header>
+
+        <div class="text-container">
+            <textarea id="text-main-input" placeholder="Type or paste your content here to begin dynamic inspection..."></textarea>
+            
+            <div class="action-bar">
+                <button class="action-btn" id="btn-upper">UPPERCASE</button>
+                <button class="action-btn" id="btn-lower">lowercase</button>
+                <button class="action-btn" id="btn-trim">Trim Excess Spaces</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="val-words">0</div>
+                <div class="label">Words</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="val-chars">0</div>
+                <div class="label">Characters</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="val-no-spaces">0</div>
+                <div class="label">No Spaces</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="val-lines">0</div>
+                <div class="label">Lines</div>
+            </div>
+        </div>
+
+        <section class="tool-info">
+            <h2>The Value of Real-Time Text Metrics</h2>
+            <p>Data parsing and typographical distribution require strict character and word boundaries, especially when compiling for constrained API limits, search engine meta descriptions, or layout structures. PixelFlow provides a high-speed, dynamic inspection grid that delivers granular analytics locally within your browser tab.</p>
+            <p>By computing length boundaries, sentence splits, and horizontal space blocks entirely inside your machine's system thread, your text input remains completely confidential. We discard remote tracking architectures entirely, ensuring zero server exposure and high execution safety.</p>
+        </section>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-main-input');
+        
+        // العدادات الإحصائية
+        const valWords = document.getElementById('val-words');
+        const valChars = document.getElementById('val-chars');
+        const valNoSpaces = document.getElementById('val-no-spaces');
+        const valLines = document.getElementById('val-lines');
+
+        // أزرار التحكم
+        const btnUpper = document.getElementById('btn-upper');
+        const btnLower = document.getElementById('btn-lower');
+        const btnTrim = document.getElementById('btn-trim');
+
+        // دالة التحليل اللحظية الشاملة
+        function analyzeText() {
+            const text = textInput.value;
+
+            // حساب الحروف الإجمالية
+            valChars.innerText = text.length;
+
+            // حساب الحروف بدون مسافات
+            const noSpacesText = text.replace(/\s/g, '');
+            valNoSpaces.innerText = noSpacesText.length;
+
+            // حساب السطور
+            const linesCount = text === "" ? 0 : text.split('\n').length;
+            valLines.innerText = linesCount;
+
+            // حساب الكلمات بذكاء لتجنب احتساب الفراغات ككلمة
+            const cleanedText = text.trim();
+            if(cleanedText === "") {
+                valWords.innerText = 0;
+            } else {
+                const wordsArray = cleanedText.split(/\s+/);
+                valWords.innerText = wordsArray.length;
+            }
+        }
+
+        // تشغيل التحليل فوراً مع كل حرف يكتبه المستخدم (Input Event)
+        textInput.addEventListener('input', analyzeText);
+
+        // وظائف الأزرار
+        btnUpper.addEventListener('click', () => {
+            textInput.value = textInput.value.toUpperCase();
+            analyzeText();
+        });
+
+        btnLower.addEventListener('click', () => {
+            textInput.value = textInput.value.toLowerCase();
+            analyzeText();
+        });
+
+        btnTrim.addEventListener('click', () => {
+            // تنظيف المسافات العشوائية بين الكلمات والمستند
+            textInput.value = textInput.value.trim().replace(/\s+/g, ' ');
+            analyzeText();
+        });
+    </script>
+</body>
+</html>

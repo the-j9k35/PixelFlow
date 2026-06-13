@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart PDF Suite | PixelFlow</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        :root { 
+            --accent-cyan: #00f0ff; 
+            --accent-purple: #9d4edd;
+            --bg-dark: #06060c; 
+            --card-bg: #0c0c16; 
+            --card-border: #18182d;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+        }
+
+        .wrapper { max-width: 800px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent-cyan); }
+
+        header { margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; color: var(--text-main); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* صندوق الرفع */
+        .upload-box {
+            background: var(--card-bg);
+            border: 2px dashed var(--card-border);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            margin-bottom: 30px;
+        }
+        .upload-box:hover, .upload-box.dragover { border-color: var(--accent-purple); }
+        .upload-box p { color: var(--text-muted); font-size: 1.1rem; }
+        .upload-box span { color: var(--accent-purple); font-weight: 600; }
+        #file-input { display: none; }
+
+        /* مساحة العمل وقائمة الملفات */
+        .workspace {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .file-list-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .file-list {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .file-item {
+            background: #111122;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .file-item .file-size {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* زر الدمج والمعالجة */
+        .merge-btn {
+            display: block;
+            width: 100%;
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.2);
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+        .merge-btn:hover { opacity: 0.9; box-shadow: 0 0 25px rgba(157, 78, 221, 0.4); }
+
+        /* حالة التحميل والانتظار */
+        .status-msg {
+            display: none;
+            text-align: center;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        /* قسم السيو والشرح للبشر ومحركات البحث */
+        .tool-info {
+            border-top: 1px solid var(--card-border);
+            padding-top: 40px;
+            margin-top: 60px;
+        }
+        .tool-info h2 { font-size: 1.6rem; margin-bottom: 20px; color: var(--accent-purple); }
+        .tool-info p { color: var(--text-muted); margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+        <header>
+            <h1>Smart PDF Suite</h1>
+            <p>Merge multiple PDF documents into a single file instantly. High security, zero server uploads.</p>
+        </header>
+
+        <div class="upload-box" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p>Drag & drop your PDF files here or <span>Browse files</span></p>
+            <p style="font-size: 0.85rem; margin-top: 10px; color: #555;">Select two or more PDF files together</p>
+            <input type="file" id="file-input" accept="application/pdf" multiple>
+        </div>
+
+        <div class="workspace" id="workspace">
+            <div class="file-list-title">Selected Documents (Will merge in this order):</div>
+            <ul class="file-list" id="file-list-render"></ul>
+
+            <button class="merge-btn" id="merge-trigger">Merge Documents Now</button>
+            <div class="status-msg" id="status-text">Processing your PDF layout locally...</div>
+        </div>
+
+        <section class="tool-info">
+            <h2>Why Merge PDF Files Locally?</h2>
+            <p>Most online PDF utilities force you to upload sensitive contracts, bank statements, or academic records directly to their remote servers. This introduces massive privacy hazards and potential data leaks. PixelFlow bypasses this entire threat vector by hosting the operational architecture directly inside your system memory.</p>
+            <p>Using advanced binary array processing via client-side scripts, our platform compiles, structure, and sequences your separate PDF pages into a uniform document blueprint without sending a single byte over the network infrastructure.</p>
+        </section>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const workspace = document.getElementById('workspace');
+        const fileListRender = document.getElementById('file-list-render');
+        const mergeTrigger = document.getElementById('merge-trigger');
+        const statusText = document.getElementById('status-text');
+
+        let pdfFilesArray = [];
+
+        // أحداث السحب والإفلات
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = Array.from(e.dataTransfer.files);
+            handleFilesSelection(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFilesSelection(files);
+        });
+
+        // التعامل مع مجموعة الملفات المختارة
+        function handleFilesSelection(files) {
+            // تصفية الملفات للتأكد أنها PDF فقط
+            const validPdfs = files.filter(file => file.type === "application/pdf");
+            
+            if(validPdfs.length === 0) {
+                alert("Please select valid PDF documents.");
+                return;
+            }
+
+            pdfFilesArray = [...pdfFilesArray, ...validPdfs];
+            renderFileList();
+        }
+
+        // عرض قائمة الملفات بشكل منسق واحترافي
+        function renderFileList() {
+            if(pdfFilesArray.length > 0) {
+                workspace.style.display = 'block';
+                workspace.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            fileListRender.innerHTML = "";
+            pdfFilesArray.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.innerHTML = `
+                    <span>${index + 1}. ${file.name}</span>
+                    <span class="file-size">${(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                `;
+                fileListRender.appendChild(li);
+            });
+        }
+
+        // عملية الدمج السحرية باستخدام مكتبة PDF-Lib
+        mergeTrigger.addEventListener('click', async () => {
+            if(pdfFilesArray.length < 2) {
+                alert("Please add at least two PDF files to merge.");
+                return;
+            }
+
+            try {
+                statusText.style.display = 'block';
+                mergeTrigger.disabled = true;
+                mergeTrigger.style.opacity = '0.5';
+
+                // إنشاء مستند PDF جديد فارغ
+                const mergedPdf = await PDFLib.PDFDocument.create();
+
+                // قراءة كل ملف ودمج صفحاته بالترتيب
+                for(const file of pdfFilesArray) {
+                    const fileArrayBuffer = await file.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(fileArrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+
+                // حفظ الملف الناتج بصيغة البايتات (Bytes)
+                const mergedPdfBytes = await mergedPdf.save();
+
+                // تحويل البايتات إلى ملف جاهز للتحميل
+                const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                // إنشاء رابط تحميل وهمي والضغط عليه تلقائياً للتحميل
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = blobUrl;
+                downloadAnchor.download = "pixelflow_merged_document.pdf";
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                document.body.removeChild(downloadAnchor);
+
+                // إعادة تعيين الحالة
+                statusText.style.display = 'none';
+                mergeTrigger.disabled = false;
+                mergeTrigger.style.opacity = '1';
+
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred while merging your PDFs. Please ensure files are not corrupted.");
+                statusText.style.display = 'none';
+                mergeTrigger.disabled = false;
+                mergeTrigger.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>
